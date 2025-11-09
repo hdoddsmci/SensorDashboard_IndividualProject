@@ -1,0 +1,10 @@
+{
+  "SensorId": "temp-1",
+  "SampleIntervalMs": 1000,
+  "MinC": 22.0,
+  "MaxC": 24.0,
+  "SmoothingWindow": 5,
+  "AnomalyStdDev": 3.0,
+  "LogToFile": true,
+  "LogFilePath": "logs/sensor.log"
+}
