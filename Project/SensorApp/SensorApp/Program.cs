@@ -8,10 +8,10 @@ class Program
     {
         try
         {
-            // Load config file
+            
             var cfg = ConfigLoader.Load("config.json");
 
-            // Initialise sensor
+            
             var sensor = new Sensor
             {
                 Name = cfg.SensorId,
@@ -22,10 +22,13 @@ class Program
 
             Console.WriteLine($"Starting sensor {sensor.Name}");
 
-            // Start sensor service
+
             var service = new SensorService(sensor, cfg.SampleIntervalMs, smoothWindow: 5, logPath: "logs/sensor.log");
             service.StartSensor(iterations: 10);
             service.ShutdownSensor();
+
+            var dashboard = new DashboardService();
+            dashboard.ShowDashboard();
 
             Console.WriteLine("Done.");
         }

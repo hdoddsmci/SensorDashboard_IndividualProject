@@ -1,0 +1,7 @@
+{
+  "SensorId": "DataCentre-1",
+  "MinC": 22.0,
+  "MaxC": 24.0,
+  "SampleIntervalMs": 1000,
+  "SimulationDuration": 10
+}

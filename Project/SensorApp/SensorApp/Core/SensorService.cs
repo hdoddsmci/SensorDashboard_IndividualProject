@@ -12,10 +12,11 @@ namespace SensorApp.Core
         private readonly int _intervalMs;
         private readonly int _smoothWindow;
         private readonly string _logPath;
+        private readonly DatabaseService _db = new();
 
         public List<SensorData> History { get; } = new();
 
-        public SensorService(Sensor sensor, int intervalMs = 1000, int smoothWindow = 5, string logPath = "logs/sensor.log")
+        public SensorService(Sensor sensor, int intervalMs, int smoothWindow, string logPath)
         {
             _sensor = sensor;
             _intervalMs = intervalMs;
@@ -23,7 +24,7 @@ namespace SensorApp.Core
             _logPath = logPath;
 
             var dir = Path.GetDirectoryName(_logPath);
-            if (!string.IsNullOrWhiteSpace(dir) && !Directory.Exists(dir))
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
         }
 
@@ -31,44 +32,44 @@ namespace SensorApp.Core
         {
             for (int i = 0; i < iterations; i++)
             {
-                var value = _sensor.SimulateData();
-                var isValid = _sensor.ValidateData(value);
+                double reading = _sensor.SimulateData();
+                bool isValid = _sensor.ValidateData(reading);
+                bool anomaly = _sensor.DetectAnomaly(reading);
 
-                _sensor.StoreData(value);
-                var isAnomaly = _sensor.DetectAnomaly(value);
-
-                var item = new SensorData
+                var data = new SensorData
                 {
                     Timestamp = DateTime.Now,
-                    ValueC = value,
+                    ValueC = reading,
                     IsValid = isValid,
-                    IsAnomaly = isAnomaly
+                    IsAnomaly = anomaly
                 };
 
-                History.Add(item);
+                _sensor.StoreData(reading);
+                History.Add(data);
 
-                LogData(item);
+                LogData(data);
 
-                var smoothed = SmoothData();
-                if (!double.IsNaN(smoothed))
-                    Console.WriteLine($"Smoothed: {smoothed:F2} C");
+                double smoothed = SmoothData();
+                Console.WriteLine($"Smoothed: {smoothed:F2} C");
 
                 Thread.Sleep(_intervalMs);
             }
         }
 
-        public void LogData(SensorData item)
+        public void LogData(SensorData data)
         {
-            var line = $"{item.Timestamp:yyyy-MM-dd HH:mm:ss} | {_sensor.Name} | {item.ValueC:F2} C | valid={item.IsValid} | anomaly={item.IsAnomaly}";
-            Console.WriteLine(line);
-            File.AppendAllText(_logPath, line + Environment.NewLine);
+            string message = $"{data.Timestamp:yyyy-MM-dd HH:mm:ss} | {_sensor.Name} | {data.ValueC:F2} C | valid={data.IsValid} | anomaly={data.IsAnomaly}";
+            Console.WriteLine(message);
+            File.AppendAllText(_logPath, message + Environment.NewLine);
+
+            _db.InsertReading(data, _sensor.Name);
         }
 
         public double SmoothData()
         {
-            if (_sensor.History.Count == 0) return double.NaN;
-            int take = Math.Min(_smoothWindow, _sensor.History.Count);
-            return _sensor.History.Skip(_sensor.History.Count - take).Average();
+            if (History.Count == 0) return 0;
+            int window = Math.Min(_smoothWindow, History.Count);
+            return History.TakeLast(window).Average(d => d.ValueC);
         }
 
         public void ShutdownSensor()
