@@ -35,5 +35,21 @@ namespace SensorTests
                 sensor.InitialiseSensor("BadSensor", "Room 101", 50, 20)
             );
         }
+        [Fact]
+        public void SimulateData_ShouldReturnValuesWithinRange()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            double min = 20;
+            double max = 30;
+            sensor.InitialiseSensor("TestSensor", "Lab", min, max);
+
+            // Act
+            double result = sensor.SimulateData();
+
+            // Assert
+            // This checks if the result is actually between 20 and 30
+            Assert.InRange(result, min, max);
+        }
     }
 }

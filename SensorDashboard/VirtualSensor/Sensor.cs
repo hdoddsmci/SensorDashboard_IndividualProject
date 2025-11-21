@@ -2,6 +2,7 @@
 {
     public class Sensor
     {
+        private Random _rnd = new Random();
         public string Name { get; set; }
         public string Location { get; set; }
         public double MinValue { get; set; }
@@ -26,6 +27,14 @@
             Location = location;
             MinValue = min;
             MaxValue = max;
+        }
+        public double SimulateData()
+        {
+            // This math generates a random number between Min and Max
+            double nextVal = _rnd.NextDouble() * (MaxValue - MinValue) + MinValue;
+
+            // Round it to 2 decimal places so it looks like a real temperature (e.g., 23.45)
+            return Math.Round(nextVal, 2);
         }
     }
 }
