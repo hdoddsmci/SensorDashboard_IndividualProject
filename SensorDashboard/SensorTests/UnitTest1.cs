@@ -139,5 +139,21 @@ namespace SensorTests
             // Assert
             Assert.True(isAnomaly);
         }
+
+        [Fact]
+        public void ShutdownSensor_ShouldClearHistory()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+            sensor.StoreData(new SensorData { Value = 25 }); // Add some data
+
+            // Act
+            sensor.ShutdownSensor();
+
+            // Assert
+            // The history should be empty after shutdown
+            Assert.Empty(sensor.History);
+        }
     }
 }

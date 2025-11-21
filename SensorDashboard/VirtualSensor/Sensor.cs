@@ -104,5 +104,10 @@ namespace VirtualSensor
             return false;
         }
 
+        public void ShutdownSensor()
+        {
+            History.Clear();
+            Console.WriteLine($"Sensor '{Name}' has been shut down and history cleared.");
+        }
     }
 }
