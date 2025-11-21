@@ -51,5 +51,35 @@ namespace SensorTests
             // This checks if the result is actually between 20 and 30
             Assert.InRange(result, min, max);
         }
+
+        [Fact]
+        public void ValidateData_ShouldReturnTrue_WhenValueIsWithinRange()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+            var data = new SensorData { Value = 20 }; // 20 is safe (between 10 and 30)
+
+            // Act
+            bool result = sensor.ValidateData(data);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void ValidateData_ShouldReturnFalse_WhenValueIsOutOfRange()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+            var data = new SensorData { Value = 50 }; // 50 is too high!
+
+            // Act
+            bool result = sensor.ValidateData(data);
+
+            // Assert
+            Assert.False(result);
+        }
     }
 }

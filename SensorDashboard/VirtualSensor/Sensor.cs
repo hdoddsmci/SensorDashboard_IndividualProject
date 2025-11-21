@@ -1,5 +1,13 @@
-﻿namespace VirtualSensor
+﻿using System;
+
+namespace VirtualSensor
 {
+    public class SensorData
+    {
+        public double Value { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
     public class Sensor
     {
         private Random _rnd = new Random();
@@ -36,5 +44,17 @@
             // Round it to 2 decimal places so it looks like a real temperature (e.g., 23.45)
             return Math.Round(nextVal, 2);
         }
+        public bool ValidateData(SensorData data)
+        {
+            if (data == null) return false;
+
+            // Check if the value is safely between Min and Max
+            if (data.Value >= MinValue && data.Value <= MaxValue)
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }
