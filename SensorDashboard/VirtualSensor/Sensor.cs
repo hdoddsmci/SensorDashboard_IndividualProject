@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VirtualSensor
 {
@@ -7,6 +8,7 @@ namespace VirtualSensor
     {
         public double Value { get; set; }
         public DateTime Timestamp { get; set; }
+
     }
 
     public class Sensor
@@ -17,7 +19,23 @@ namespace VirtualSensor
         public string Location { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
+        public double SmoothData()
+        {
+            // If we have no history, we can't smooth anything.
+            if (History.Count == 0) return 0;
 
+            // If we have less than 3 records, just return the latest one (not enough to average)
+            if (History.Count < 3)
+            {
+                return History.Last().Value;
+            }
+
+            // Take the last 3 readings and calculate the average
+            var lastThree = History.Skip(History.Count - 3).Take(3);
+            double average = lastThree.Average(d => d.Value);
+
+            return Math.Round(average, 2);
+        }
         // This matches your assignment requirement: "InitialiseSensor"
         public void InitialiseSensor(string name, string location, double min, double max)
         {

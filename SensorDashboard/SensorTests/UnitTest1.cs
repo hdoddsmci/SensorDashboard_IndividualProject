@@ -98,5 +98,25 @@ namespace SensorTests
             Assert.Single(sensor.History);
             Assert.Equal(25, sensor.History[0].Value);
         }
+
+        [Fact]
+        public void SmoothData_ShouldReturnAverageOfLastThreeValues()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+
+            // Add 3 specific data points
+            sensor.StoreData(new SensorData { Value = 22 });
+            sensor.StoreData(new SensorData { Value = 24 });
+            sensor.StoreData(new SensorData { Value = 23 });
+
+            // Act
+            double result = sensor.SmoothData();
+
+            // Assert
+            // The average of 22, 24, and 23 is exactly 23
+            Assert.Equal(23, result);
+        }
     }
 }
