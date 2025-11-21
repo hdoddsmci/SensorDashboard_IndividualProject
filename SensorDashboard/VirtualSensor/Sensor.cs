@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace VirtualSensor
 {
@@ -11,6 +12,7 @@ namespace VirtualSensor
     public class Sensor
     {
         private Random _rnd = new Random();
+        public List<SensorData> History { get; private set; } = new List<SensorData>();
         public string Name { get; set; }
         public string Location { get; set; }
         public double MinValue { get; set; }
@@ -47,13 +49,21 @@ namespace VirtualSensor
         public bool ValidateData(SensorData data)
         {
             if (data == null) return false;
+            return (data.Value >= MinValue && data.Value <= MaxValue);
+        }
 
-            // Check if the value is safely between Min and Max
-            if (data.Value >= MinValue && data.Value <= MaxValue)
+        public void StoreData(SensorData data)
+        {
+            if (data != null)
             {
-                return true;
+                History.Add(data);
             }
-            return false;
+        }
+
+        public void LogData(SensorData data)
+        {
+            // Simple console logging for now
+            Console.WriteLine($"[{data.Timestamp}] Sensor '{Name}' ({Location}): {data.Value}°C");
         }
 
     }

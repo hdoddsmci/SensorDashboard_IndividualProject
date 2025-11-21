@@ -81,5 +81,22 @@ namespace SensorTests
             // Assert
             Assert.False(result);
         }
+
+        [Fact]
+        public void StoreData_ShouldAddToHistory_WhenDataIsValid()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+            var data = new SensorData { Value = 25 };
+
+            // Act
+            sensor.StoreData(data);
+
+            // Assert
+            // The list count should be 1 because we added one item
+            Assert.Single(sensor.History);
+            Assert.Equal(25, sensor.History[0].Value);
+        }
     }
 }
