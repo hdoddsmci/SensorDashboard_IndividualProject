@@ -155,5 +155,37 @@ namespace SensorTests
             // The history should be empty after shutdown
             Assert.Empty(sensor.History);
         }
+
+        [Fact]
+        public void InjectFault_ShouldForceHighValues()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 20, 25);
+
+            // Act
+            sensor.InjectFault(); // Break the sensor
+            double result = sensor.SimulateData();
+
+            // Assert
+            // Result should be > 45 (because we set fault values to 45+)
+            Assert.True(result >= 45);
+        }
+
+        [Fact]
+        public void CheckThreshold_ShouldReturnTrue_WhenValueExceedsMax()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 20, 25);
+            var badData = new SensorData { Value = 30 }; // 30 is > Max (25)
+
+            // Act
+            bool alert = sensor.CheckThreshold(badData);
+
+            // Assert
+            Assert.True(alert);
+        }
+
     }
 }

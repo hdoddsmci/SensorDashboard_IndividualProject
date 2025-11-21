@@ -14,6 +14,7 @@ namespace VirtualSensor
     public class Sensor
     {
         private Random _rnd = new Random();
+        private bool _isFaulty = false;
         public List<SensorData> History { get; private set; } = new List<SensorData>();
         public string Name { get; set; }
         public string Location { get; set; }
@@ -58,12 +59,23 @@ namespace VirtualSensor
         }
         public double SimulateData()
         {
-            // This math generates a random number between Min and Max
+            // If the sensor is faulty (cooling failure), return a very high temperature!
+            if (_isFaulty)
+            {
+                // Returns a random value between 45.0 and 50.0
+                double faultVal = 45.0 + (_rnd.NextDouble() * 5);
+                return Math.Round(faultVal, 2);
+            }
+            // Normal behavior
             double nextVal = _rnd.NextDouble() * (MaxValue - MinValue) + MinValue;
-
-            // Round it to 2 decimal places so it looks like a real temperature (e.g., 23.45)
             return Math.Round(nextVal, 2);
         }
+        public void InjectFault()
+        {
+            _isFaulty = true;
+            Console.WriteLine($"WARNING: Fault injected into Sensor '{Name}'! Cooling unit failure simulated.");
+        }
+
         public bool ValidateData(SensorData data)
         {
             if (data == null) return false;
@@ -101,6 +113,15 @@ namespace VirtualSensor
                 return true;
             }
 
+            return false;
+        }
+
+        public bool CheckThreshold(SensorData data)
+        {
+            if (data.Value > MaxValue)
+            {
+                return true; // Alert triggered!
+            }
             return false;
         }
 
