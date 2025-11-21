@@ -1,10 +1,11 @@
 ﻿using System;
-using System.IO;
-using System.Text.Json;
+using System.IO;            
+using System.Text.Json;     
 using System.Threading;
 
 namespace VirtualSensor
 {
+    // 1. Define what the JSON looks like so C# can read it
     public class SensorConfig
     {
         public string SensorName { get; set; }
@@ -13,19 +14,34 @@ namespace VirtualSensor
         public double MaxValue { get; set; }
     }
 
-
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("--- Virtual Temperature Sensor App ---");
 
-            // 1. Create and Initialise the Sensor
             Sensor mySensor = new Sensor();
+            string configFilePath = "sensor_config.json";
 
+            // 2. Try to read the configuration from the file
             try
             {
-                mySensor.InitialiseSensor("Server-Room-01", "Rack 4B", 21, 25);
+                if (File.Exists(configFilePath))
+                {
+                    string jsonString = File.ReadAllText(configFilePath);
+                    SensorConfig config = JsonSerializer.Deserialize<SensorConfig>(jsonString);
+
+                    // Use the values from the file!
+                    mySensor.InitialiseSensor(config.SensorName, config.Location, config.MinValue, config.MaxValue);
+                    Console.WriteLine("Configuration loaded successfully from 'sensor_config.json'.");
+                }
+                else
+                {
+                    // Fallback if file is missing
+                    Console.WriteLine("Config file not found. Using default values.");
+                    mySensor.InitialiseSensor("DefaultSensor", "Unknown", 22, 24);
+                }
+
                 Console.WriteLine($"Sensor '{mySensor.Name}' initialized at {mySensor.Location}.");
                 Console.WriteLine($"Target Range: {mySensor.MinValue}°C - {mySensor.MaxValue}°C");
             }
@@ -40,13 +56,12 @@ namespace VirtualSensor
 
             int counter = 0;
 
-            // 2. Main Loop
+            // 3. Main Loop (Run forever)
             while (true)
             {
                 counter++;
 
-                // --- FAULT INJECTION LOGIC ---
-                // After 5 loops (approx 10 seconds), break the sensor!
+                // Inject Fault after 5 loops (approx 10 seconds)
                 if (counter == 5)
                 {
                     Console.ForegroundColor = ConsoleColor.Magenta;
@@ -54,15 +69,11 @@ namespace VirtualSensor
                     mySensor.InjectFault();
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
-                // -----------------------------
 
-                // A. Simulate Data
                 double temp = mySensor.SimulateData();
                 SensorData dataPoint = new SensorData { Value = temp, Timestamp = DateTime.Now };
 
-                // B. Check Status (Using our new CheckThreshold logic)
                 bool isThresholdBreached = mySensor.CheckThreshold(dataPoint);
-
                 string status = "OK";
 
                 if (isThresholdBreached)
@@ -72,7 +83,6 @@ namespace VirtualSensor
                 }
                 else
                 {
-                    // If it's not critical, check for simple validity or anomalies
                     bool isValid = mySensor.ValidateData(dataPoint);
                     bool isAnomaly = mySensor.DetectAnomaly(dataPoint);
 
@@ -92,18 +102,13 @@ namespace VirtualSensor
                     }
                 }
 
-                // C. Log to Console
                 mySensor.StoreData(dataPoint);
                 Console.WriteLine($"[{dataPoint.Timestamp.ToLongTimeString()}] Temp: {dataPoint.Value}°C | Status: {status}");
-
-                // Reset color
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                // D. Show Average
-                double smoothed = mySensor.SmoothData(); // <--- This is the only place we define 'smoothed' now!
+                double smoothed = mySensor.SmoothData();
                 Console.WriteLine($"      -> Moving Average: {smoothed}°C");
 
-                // Pause
                 Thread.Sleep(2000);
             }
         }
