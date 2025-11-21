@@ -84,5 +84,25 @@ namespace VirtualSensor
             Console.WriteLine($"[{data.Timestamp}] Sensor '{Name}' ({Location}): {data.Value}°C");
         }
 
+        public bool DetectAnomaly(SensorData data)
+        {
+            // If we don't have enough history to compare against, it's not an anomaly yet.
+            if (History.Count < 3) return false;
+
+            // Get the average of the previous readings
+            double recentAverage = SmoothData();
+
+            // Calculate the difference (absolute value ignores negative signs)
+            double difference = Math.Abs(data.Value - recentAverage);
+
+            // If the difference is greater than 5 degrees, it's an anomaly (spike)
+            if (difference > 5.0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }

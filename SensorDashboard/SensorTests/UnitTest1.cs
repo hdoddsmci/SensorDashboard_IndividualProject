@@ -118,5 +118,26 @@ namespace SensorTests
             // The average of 22, 24, and 23 is exactly 23
             Assert.Equal(23, result);
         }
+
+        [Fact]
+        public void DetectAnomaly_ShouldReturnTrue_WhenValueIsSpike()
+        {
+            // Arrange
+            var sensor = new Sensor();
+            sensor.InitialiseSensor("Test", "Room", 10, 30);
+
+            // Fill history with steady data (Average is 20)
+            sensor.StoreData(new SensorData { Value = 20 });
+            sensor.StoreData(new SensorData { Value = 20 });
+            sensor.StoreData(new SensorData { Value = 20 });
+
+            // Act
+            // 30 is 10 degrees away from 20. That is a spike!
+            var spikeData = new SensorData { Value = 30 };
+            bool isAnomaly = sensor.DetectAnomaly(spikeData);
+
+            // Assert
+            Assert.True(isAnomaly);
+        }
     }
 }
