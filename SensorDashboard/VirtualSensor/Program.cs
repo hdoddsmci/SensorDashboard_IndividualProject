@@ -1,8 +1,19 @@
 ﻿using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading;
 
 namespace VirtualSensor
 {
+    public class SensorConfig
+    {
+        public string SensorName { get; set; }
+        public string Location { get; set; }
+        public double MinValue { get; set; }
+        public double MaxValue { get; set; }
+    }
+
+
     class Program
     {
         static void Main(string[] args)
